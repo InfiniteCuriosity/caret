@@ -16,3 +16,5 @@ The `caret` package (short for **C**lassification **A**nd **RE**gression **T**ra
 as well as other functionality.
 
 The current release version can be found on [CRAN](http://cran.r-project.org/web/packages/caret/) and the project is hosted on [github](https://github.com/topepo/caret)
+
+Conclusion of chapter 1!
