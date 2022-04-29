@@ -1,0 +1,18 @@
+---
+title: "1. Introduction"
+author: "Russ Conte"
+date: "4/29/2022"
+output: html_document
+---
+
+The `caret` package (short for **C**lassification **A**nd **RE**gression **T**raining) is a set of functions that attempt to streamline the process for creating predictive models. The package conatins tools for:
+
+- data splitting
+- pre-processing
+- feature selection
+- model tuning and resampling
+- variable importance estimation
+
+as well as other functionality.
+
+The current release version can be found on [CRAN](http://cran.r-project.org/web/packages/caret/) and the project is hosted on [github](https://github.com/topepo/caret)
