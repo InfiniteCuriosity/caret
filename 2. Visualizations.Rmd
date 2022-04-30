@@ -1,11 +1,11 @@
 ---
-title: "2. Visualizations"
+title: "2. Visualizations using caret"
 author: "Russ Conte"
 date: "4/29/2022"
 output: html_document
 ---
 
-The `featurePlot` function is a wrappter for different `lattice` plots to visualize the data. For example, the following figured show the default plot for continuous outcomes generated using the `featurePlot` function.
+The `featurePlot` function is a wrappter for different `lattice` plots to visualize the data. For example, the following figures show the default plot for continuous outcomes generated using the `featurePlot` function.
 
 For classification data sets, the <span style="color:blue">`iris`</span> data are used for illustration.
 
@@ -22,7 +22,7 @@ Packages = c("AppliedPredictiveModeling", "caret", "tidyverse", "mlbench")
 lapply(Packages, library, character.only = TRUE)
 ```
 
-Let's create the scatterplot matrix!
+Let's create the scatterplot matrix for the iris data set!
 
 ```{r create a scatterplot matrix of the data in the iris data set}
 transparentTheme(trans = 0.4)
@@ -47,7 +47,7 @@ featurePlot(x = iris[,1:4],
 # A working example of the same solution using the mpg data set from tidyverse:
 
 mpg1 <- mpg %>% 
-  mutate(class = as.factor(class))
+  mutate(class = as.factor(class)) # convert y-hat to a factor
 
 featurePlot(x = mpg1[,c(3,8:9)],
             y = mpg1$class,
@@ -65,7 +65,9 @@ featurePlot(x = iris[1:4],
             y = iris$Species,
             plot = "density")
 
-# Repeat the same, but pass in options to xyplot() to make it prettier
+```
+
+```{Repeat density plots, but pass in options to xyplot() to make it prettier}
 
 featurePlot(x = iris[,1:4],
             y = iris$Species,
@@ -91,7 +93,7 @@ featurePlot(x = mpg1[,c(3,8:9)],
                           y = list(relation = "free"),
             adjust = 1.5),
             pch = "|",
-            auto.key = list(columns = 7))
+            auto.key = list(columns = 3)) # creates three columns for the labels - nice!
 
 ```
 
@@ -109,6 +111,21 @@ featurePlot(x = iris[,1:4],
             auto.key = list(columns = 2))
 
 ```
+
+Repeat similar exercise for box plots using mpg data from tidyverse:
+
+```{r Box plots using caret and the mpg data set from tidyverse}
+
+featurePlot(x = mpg1[,c(3, 8:9)],
+            y = mpg1$class,
+            plot = "box",
+            scales = list(y = list(relation = "free"),
+                          x = list(rot = 90)),
+            layout = c(4,1),
+            auto.key = list(columns = 2))
+
+```
+
 
 ### Scatter Plots
 
@@ -150,3 +167,21 @@ featurePlot(x = BostonHousing[, regVar],
 ```
 
 Note that the options `degree` and `span` control the smoothness of the smoother.
+
+Let's create a feature plot with the continuous variables in the mpg data set. Let's predict and plot highway mileage given the four other continuous values in the data set:
+
+```{r Create scatter plots in the mpg data set from tidyverse}
+
+featurePlot(x = mpg1[,c(3:5,8)],
+            y = mpg1$hwy,
+            plot = "scatter",
+            type = c("p", "smooth"),
+            span = 0.5,
+            layout = c(4,1))
+
+
+```
+
+Summary of the graph: Clearly the city mileage is the strongest predictor of the four for highway mileage.
+
+This completes chapter 2, Visualizations, it was a lot of fun, and I learned a lot (as always!)
