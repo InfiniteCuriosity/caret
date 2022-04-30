@@ -1,0 +1,33 @@
+---
+title: "3. Pre-Processing using caret"
+author: "Russ Conte"
+date: "4/30/2022"
+output: html_document
+---
+
+`caret` includes several functions to pre-process the predictor data. It assumes that all of the data are numeric (i.e. factors have been converted to dummy variables via `model.matrix`, `dummyVars`, or other means.)
+
+### 3.1 Creating Dummy Variables
+
+The function `dummuVars` can be used to generate a complete (less than full rank parameterized) set of dummy variables from one or more factors. The function takes a formula and a data set and outputs an object that can be used to create the dummy variables using the predict method.
+
+For example, the `etitanic` data set in the <span style="color:blue">`earth`</span> package includes two factors: `pclass` (passenger class, with levels 1st, 2nd, and 3rd) and `sex` (with levels female, male).
+
+Let's load all the packages in two lines of code:
+
+```{r}
+Packages = c("AppliedPredictiveModeling", "caret", "tidyverse", "e1071", "earth")
+lapply(Packages, library, character.only = TRUE)
+```
+
+Using `dummyVars`:
+
+```{r Using dummyVars to create dummy variables in the titanic data set}
+
+dummies <- dummyVars(survived~., data = etitanic)
+head(predict(dummies, newdata = etitanic))
+
+```
+
+The authors point out there is no intercept, and each factor has a dummy variable for each level. This may not be useful for some modeling situations, such as `lm`.
+
