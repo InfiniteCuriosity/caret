@@ -1,0 +1,149 @@
+---
+title: "2. Visualizations"
+author: "Russ Conte"
+date: "4/29/2022"
+output: html_document
+---
+
+The `featurePlot` function is a wrappter for different `lattice` plots to visualize the data. For example, the following figured show the default plot for continuous outcomes generated using the `featurePlot` function.
+
+For classification data sets, the <span style="color:blue">`iris`</span> data are used for illustration.
+
+```{r information about the `iris` data set}
+str(iris)
+```
+
+### Scatterplot Matrix
+
+This first block of code loads all the required packages in two lines - nice and clean!
+
+```{r load all packages from two lines of code}
+Packages = c("AppliedPredictiveModeling", "caret", "tidyverse", "mlbench")
+lapply(Packages, library, character.only = TRUE)
+```
+
+Let's create the scatterplot matrix!
+
+```{r create a scatterplot matrix of the data in the iris data set}
+transparentTheme(trans = 0.4)
+featurePlot(x = iris[,1:4],
+            y = iris$Species,
+            plot = "pairs",
+            ## Add a key at the top to list the names of the irises
+            auto.key = list(columns = 3))
+
+```
+
+### Scatterplot Matrix with Ellipses
+
+```{r Scatterplot Matrix withEllipses}
+
+featurePlot(x = iris[,1:4],
+             y = iris$Species,
+            plot = "ellipse",
+            ## Add a key at the top of the data visualization
+            auto.key = list(columns = 3))
+
+# A working example of the same solution using the mpg data set from tidyverse:
+
+featurePlot(x = mpg1[,c(3,8:9)],
+            y = mpg1$class,
+            plot = "ellipse",
+            auto.key = list(7))
+
+```
+
+### Overlayed Density Plots (I like these a lot!)
+
+```{r Overlayed Density Plots}
+
+transparentTheme(trans = 0.9)
+featurePlot(x = iris[1:4],
+            y = iris$Species,
+            plot = "density")
+
+# Repeat the same, but pass in options to xyplot() to make it prettier
+
+featurePlot(x = iris[,1:4],
+            y = iris$Species,
+            plot = "density",
+            scales = list(x = list(relation = "free"),
+                          y = list(relation = "free")),
+            adjust = 1.5,
+            pch = "|",
+            layout = c(4,1),
+            auto.key = list(columns = 3))
+
+
+```
+
+Repeat similar exercise for density plots using mpg data set from tidyverse:
+
+```{r Repeat density plot exercise with mpg data from tidyverse}
+
+featurePlot(x = mpg1[,c(3,8:9)],
+            y = mpg1$class,
+            plot = "density",
+            scales = list(x = list(relation = "free"),
+                          y = list(relation = "free"),
+            adjust = 1.5),
+            pch = "|",
+            auto.key = list(columns = 7))
+
+```
+
+### Box plots
+
+```{r Box plots using caret and the iris data set}
+
+featurePlot(x = iris[,1:4],
+            y = iris$Species,
+            plot = "box",
+# pass in options to bwplot()
+            scales = list(y = list(relation = "free"),
+                          x = list(rot = 90)),
+            layout = c(4,1),
+            auto.key = list(columns = 2))
+
+```
+
+### Scatter Plots
+
+For regression, we'll start with the Boston housing data set:
+
+```{r First regression exammple}
+data("BostonHousing")
+regVar <- c("age", "lstat", "tax")
+str(BostonHousing[, regVar])
+
+```
+
+When the predictors are continuous, `featurePlot` can be used to create scatter plots of each of the predictors with the outcome. For example:
+
+```{r Scatterplots with continuous predictors}
+
+theme1 <- trellis.par.get()
+theme1$plot.symbol$col = rgb(.2, .2, .2, .4)
+theme1$plot.symbol.pch = 16
+theme1$plot.line$col = rgb(1,0,0,.7)
+theme1$plot.line$lwd <- 2
+trellis.par.set(theme1)
+featurePlot(x = BostonHousing[,regVar],
+            y = BostonHousing$medv,
+            plot = "scatter",
+            layout = c(3,1))
+
+```
+
+Note that the x-axis scales are different from one another. The function automaticallyuses `scales = list(y = list(relation = "free`)) so you don't have to add it. We can also pass in options to the `lattice` function `xyplot`. For example, we can add a scatter plot smoother by passing in new options:
+
+```{r}
+featurePlot(x = BostonHousing[, regVar],
+            y = BostonHousing$medv,
+            plot = "scatter",
+            type = c("p","smooth"),
+            span = 0.5,
+            layout = c(3,1))
+```
+
+Note that the options `degree` and `span` control the smoothness of the smoother.
