@@ -46,6 +46,9 @@ featurePlot(x = iris[,1:4],
 
 # A working example of the same solution using the mpg data set from tidyverse:
 
+mpg1 <- mpg %>% 
+  mutate(class = as.factor(class))
+
 featurePlot(x = mpg1[,c(3,8:9)],
             y = mpg1$class,
             plot = "ellipse",
