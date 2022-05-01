@@ -82,6 +82,19 @@ dim(filteredDescr)
 
 ```
 
+
+Let's use the tidyverse to find the predictors with the lowest variance:
+
+```{r Tidyverse to find predictors with the lowest variance in the MDRR data set}
+
+mdrrDescr %>% 
+  summarise(across(where(is.numeric), var)) %>% 
+  pivot_longer(everything()) %>% 
+  arrange(value)
+
+```
+
+
 By default `nearZeroVar` will return the positions of the variables that are flagged to be problems.
 
 ### 3.3 Identifying Correlated Predictors
@@ -177,23 +190,23 @@ Let's look at the resuls:
 
 ```{r Look at the results of Centering and Scaling the MDRR data set}
 
-mdrrClass
+mdrrClass[1:10]
 
-inTrain
+inTrain[1:10]
 
-training
+training[1:10,]
 
-test
+test[1:10,]
 
-trainMDRR
+trainMDRR[1:10]
 
-testMDRR
+testMDRR[1:10]
 
 preProcValues
 
-trainTransformed
+trainTransformed[1:10,]
 
-testTransformed
+testTransformed[1:10,]
 ```
 
 Let's do the same with the MPG data set from Tidyverse
@@ -222,3 +235,148 @@ test1Transformed
 ## 3.7 Imputation
 
 `preProcess` can be used to impute data sets based only on information in the training set. One method of doing this is with K-nearest neighbors. For an arbitrary sample, the K closest neighbors are found in the training set and the value of the predictor is imputed using these values (e. g. Using the mean).Using this approach will automatically trigger `pre-process` to center and scale the data, regardless of what is in the `method` argument. Alternatively, bagged trees can also be used to impute. For each predictor in the data, a bagged tree is created using all of the other predictors in the training set. When a new sample has a missing predictor value, the bagged model is used to predict the value. While, in theory, this is a more powerful method of imputing, the computational costs are much higher than the nearest neighbor technique.
+
+## 3.8 Transforming Predictors
+
+In some cases, there is a need to use principal component analysis (PCA) to transform the data to a smaller sub – space where the new variables are uncorrelated with one another. The back tick pre-process backed class can be applied as transformation by using the ` "PCA quote ` in the ` method ` argument. Doing this will also for scaling of the predictors. Note that when PCA is requested, ` predict that preprocess ` change the column names to ` PC1 `, ` PC 2`, and sev.
+
+Similarly, independent component analysis (ICE) can also be used to find new variables that are linear combinations of the original set such that the components are independent (as opposed to uncorrelated in PCA). The new variables will be labeled as ` IC 1 `, ` IC 2`, and so on.
+
+The "special sign" transformation (Serneels at all, 2006) projects the data for a predictor to the unit circle in p dimensions, where p is the number of predictors. Essentially, a vector of data is divided by its norm. The two figures below show two centered and scale descriptors from the MDRR data before an after the special sign transformation. The predictors should be centered and scaled before applying this transformation.
+
+```{r Transforming Predictors}
+
+transparentTheme(trans = 0.4)
+
+plotSubset <-  data.frame(scale(mdrrDescr[, c("nC", "X4v")]))
+xyplot(nC ~ X4v,
+       data = plotSubset,
+       groups = mdrrClass,
+       auto.key = list(columns = 2))
+
+```
+
+Let's do the same transforming predictors with the MPG data set:
+
+```{r Transforming predictors with the MPG data set}
+
+class1 <- mpg$class
+transparentTheme(trans = 0.4)
+plotSubset1 <- data.frame(scale(mpg[,c("displ", "cty")]))
+xyplot(cty~displ,
+       data = plotSubset1,
+       groups = class1,
+       auto.key = list(columns = 3))
+
+```
+
+After the spatial sign:
+
+```{r After the spatial sign}
+
+transformed <- spatialSign(plotSubset)
+transformed <- as.data.frame(transformed)
+xyplot(nC ~ X4v,
+       data = transformed,
+       groups = mdrrClass,
+       auto.key = list(columns = 2))
+
+```
+
+Perform spatial sign with the mpg data set from tidyverse:
+
+```{r Spatial sign with the mpg data set from tidyverse}
+
+transformed1 <- spatialSign(plotSubset1)
+transformed1 <- as.data.frame(transformed1)
+xyplot(cty ~ displ,
+       data = transformed1,
+       groups = class1,
+       auto.key = list(columns = 2))
+
+```
+
+Another option, `"BoxCox"` will estimate a Box–Cox transformation on the predictors of the data are greater than zero.
+
+```{r Box-Cox transformtion on data greater than zero}
+
+preProcValues2 <- preProcess(training, method = "BoxCox")
+trainBC <- predict(preProcValues2, training)
+testBC <- predict(preProcValues2, test)
+preProcValues2
+
+```
+
+The`NA` values correspond to the predictors that could not be transformed. This transformation requires the data to be greater than zero. Two similar transformation, the Yeo-Johnson and exponential transformation of Manly (1976) can also be used in `preProcess`
+
+## 3.9 Putting It All Together
+
+In *Applied Predictive Modeling* there is a case study where the execution times of jobs in a high performance environment are being predicted. The data are:
+
+```{r Execution times of jobs in a high performance computing environment}
+
+data("schedulingData")
+str(schedulingData)
+
+```
+
+The data are mix of categorical and numerical predictors. Suppose we want to use the Yeo – Johnson transformation on the continuous predictors then center and scale them. Let's also suppose that we will be running a tree–based model so we might want to keep the factors as factors (as opposed to creating dummy variables). We run the function on all the columns except the last, which is the outcome.
+
+```{r Yeo-Johnson transformation on execution times in a high performance computing environment}
+
+pp_hpc <- preProcess(schedulingData[,-8],
+                     method = c("center", "scale", "YeoJohnson"))
+pp_hpc
+
+```
+
+The two predictors labeled as "ignored "in the output are the two factor predictors. These are not altered but the numeric protectors are transformed. However, the predictor for the number of pending jobs, has a very sparse and unbalanced distribution:
+
+```{r mean of the number of pending jobs}
+
+mean(schedulingData$NumPending == 0)
+
+```
+
+For some other models, this might be an issue (especially if we resample or down-sample the data). We can add a filter to check for zero- or near zero-variance predictors prior to running the pre-processing calculations:
+
+```{r Checking for zero or near zero variance}
+
+pp_no_nzv <- preProcess(schedulingData[,-8],
+                        method = c("center", "scale", "YeoJohnson", "nzv"))
+pp_no_nzv
+
+```
+
+Note that one predictor is labeled as "removed" and the processed data lack the sparse predictor.
+
+## 3.10 Class Distance Calculations
+
+`caret` contains functions to generate new predictor variables based on distances to class centroid's (parenthesis) similar to how linear discriminate analysis works). For each level of a factor variable, the class centroid and covariance matrix is calculated. For new samples the Mahalanobis distance to each of the class centroids is computed and can be used as an additional predictor. This can be useful for nonlinear models when the true decision bottle boundary is actually linear.
+
+In cases where there are more predictors within a class than samples, the `classDist` function has arguments called `pca` and `keep` arguments that allow for principal components analysis within each class to be used to avoid issues with singular covariance matrices.
+
+`predict.classDist` is then used to generate the class distances. By default, the distances are logged, but this can changed by the `trans` argument to `predict.classDist`.
+
+As an example we can use the MDRR data:
+
+```{r Class Distance Calculations with the MDRR data}
+
+centroids <- classDist(trainBC, trainMDRR)
+distances <- predict(centroids, testBC)
+distances <- as.data.frame(distances)
+head(distances)
+```
+
+This image shows a scatterplot matrix of the class distances for held-out samples:
+
+```{r Scatterplot for held-out samples}
+
+xyplot(dist.Active ~ dist.Inactive,
+       data = distances,
+       groups = testMDRR,
+       auto.key = list(columns = 2))
+
+
+```
+
