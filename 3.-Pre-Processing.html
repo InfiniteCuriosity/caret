@@ -261,6 +261,54 @@ head(predict(dummies, newdata = etitanic))</code></pre>
 ## 5          1          0          0          1        0 25.0000     1     2
 ## 6          1          0          0          0        1 48.0000     0     0</code></pre>
 <p>The authors point out there is no intercept, and each factor has a dummy variable for each level. This may not be useful for some modeling situations, such as <code>lm</code>.</p>
+<p>Same idea, using the diamonds data set from tidyverse</p>
+<pre class="r"><code>dummies &lt;- dummyVars(price~., data = diamonds)
+head(predict(dummies, newdata = diamonds))</code></pre>
+<pre><code>##   carat         cut.L      cut.Q         cut.C      cut^4    color.L
+## 1  0.23  6.324555e-01  0.5345225  3.162278e-01  0.1195229 -0.3779645
+## 2  0.21  3.162278e-01 -0.2672612 -6.324555e-01 -0.4780914 -0.3779645
+## 3  0.23 -3.162278e-01 -0.2672612  6.324555e-01 -0.4780914 -0.3779645
+## 4  0.29  3.162278e-01 -0.2672612 -6.324555e-01 -0.4780914  0.3779645
+## 5  0.31 -3.162278e-01 -0.2672612  6.324555e-01 -0.4780914  0.5669467
+## 6  0.24 -1.481950e-18 -0.5345225 -3.893692e-16  0.7171372  0.5669467
+##         color.Q    color.C    color^4    color^5     color^6   clarity.L
+## 1  8.914347e-17  0.4082483 -0.5640761  0.4364358 -0.19738551 -0.38575837
+## 2  8.914347e-17  0.4082483 -0.5640761  0.4364358 -0.19738551 -0.23145502
+## 3  8.914347e-17  0.4082483 -0.5640761  0.4364358 -0.19738551  0.07715167
+## 4 -5.621884e-17 -0.4082483 -0.5640761 -0.4364358 -0.19738551 -0.07715167
+## 5  5.455447e-01  0.4082483  0.2417469  0.1091089  0.03289758 -0.38575837
+## 6  5.455447e-01  0.4082483  0.2417469  0.1091089  0.03289758  0.23145502
+##     clarity.Q  clarity.C  clarity^4  clarity^5  clarity^6  clarity^7 depth
+## 1  0.07715167  0.3077287 -0.5237849  0.4921546 -0.3077287  0.1194880  61.5
+## 2 -0.23145502  0.4308202 -0.1208734 -0.3637664  0.5539117 -0.3584641  59.8
+## 3 -0.38575837 -0.1846372  0.3626203  0.3209704 -0.3077287 -0.5974401  56.9
+## 4 -0.38575837  0.1846372  0.3626203 -0.3209704 -0.3077287  0.5974401  62.4
+## 5  0.07715167  0.3077287 -0.5237849  0.4921546 -0.3077287  0.1194880  63.3
+## 6 -0.23145502 -0.4308202 -0.1208734  0.3637664  0.5539117  0.3584641  62.8
+##   table    x    y    z
+## 1    55 3.95 3.98 2.43
+## 2    61 3.89 3.84 2.31
+## 3    65 4.05 4.07 2.31
+## 4    58 4.20 4.23 2.63
+## 5    58 4.34 4.35 2.75
+## 6    57 3.94 3.96 2.48</code></pre>
+</div>
+<div id="zero-and-near-zero-variance-predictors" class="section level3">
+<h3>3.2 Zero and Near Zero Variance Predictors</h3>
+<p>In some situations, the data generating mechanism can create predictors that only have a single unique value (i.e. a “zero-variance predictor”). For many models (excluding tree-based models) this may cause the model to crash or the fit to be unstable.</p>
+<p>In a similar way, predictors might have only a handful of unique values gthat occur with very low frequencies. An example is the mdrr data set, and the <code>nR11</code> descriptor (number of 11-membered rings):</p>
+<pre class="r"><code>data(mdrr)
+data.frame(table(mdrrDescr$nR11))</code></pre>
+<pre><code>##   Var1 Freq
+## 1    0  501
+## 2    1    4
+## 3    2   23</code></pre>
+<p>The concern here is that these predictors may become zero – variance predictors when the data are split into cross – validation/bootstrap sub – summaries or that a few samples may have an undo influence on the model. These “nearest – zero – variance”predictors may need to be identified and eliminated prior to modeling.</p>
+<p>To identify these types of predictors, the following two metrics can be calculated:</p>
+<ul>
+<li>The frequency of the most prevalent value over the second most frequent value left process (called the “frequency ratio”), which would be near one for while behaved predictors and very large for highly balanced data and</li>
+<li>The “percentage of unique values” is the Number of unique value divided by the total number of samples parentheses times 100) zero as a granularity of the data increases.</li>
+</ul>
 </div>
 
 
