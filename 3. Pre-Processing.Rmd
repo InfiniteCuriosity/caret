@@ -57,7 +57,7 @@ The concern here is that these predictors may become zero–variance predictors 
 
 To identify these types of predictors, the following two metrics can be calculated:
 
-- The frequency of the most prevalent value over the second most frequent value left process (called the "frequency ratio"), which would be near one for while behaved predictors and very large for highly balanced data and
+- The frequency of the most prevalent value over the second most frequent value (called the "frequency ratio"), which would be near one for while behaved predictors and very large for highly balanced data and
 - The "percentage of unique values" is the Number of unique value divided by the total number of samples parentheses times 100) zero as a granularity of the data increases.
 
 If the frequency ratio was greater than a pre-specified threshold and the unique value percentage is less than a threshold, we might consider a predictor to be near zero variance.
@@ -81,7 +81,6 @@ filteredDescr <- mdrrDescr[, -nzv]
 dim(filteredDescr)
 
 ```
-
 
 Let's use the tidyverse to find the predictors with the lowest variance:
 
@@ -108,7 +107,7 @@ highCorr <- sum(abs(descrCor[upper.tri(descrCor)]) > 0.999)
 
 ```
 
-For the previous MDRR data, there are 65 descriptors that are almost perfectly correlated (correlation greater than 0.99), such as the total information index of composition (`IAC`) and the total information contact index (neighborhood symmetry of zero-order) (`TIC0`) (correlation equals one). The code chunk below shows the effect of removing the descriptors with absolute correlations above 0.75
+For the previous MDRR data, there are 65 descriptors that are almost perfectly correlated (correlation greater than 0.99), such as the total information index of composition (`IAC`) and the total information contact index (neighborhood symmetry of zero-order) (`TIC0`) (correlation = 1). The code chunk below shows the effect of removing the descriptors with absolute correlations above 0.75
 
 ```{r Remove features correlated above 0.75}
 
@@ -238,9 +237,9 @@ test1Transformed
 
 ## 3.8 Transforming Predictors
 
-In some cases, there is a need to use principal component analysis (PCA) to transform the data to a smaller sub – space where the new variables are uncorrelated with one another. The back tick pre-process backed class can be applied as transformation by using the ` "PCA quote ` in the ` method ` argument. Doing this will also for scaling of the predictors. Note that when PCA is requested, ` predict that preprocess ` change the column names to ` PC1 `, ` PC 2`, and sev.
+In some cases, there is a need to use principal component analysis (PCA) to transform the data to a smaller sub – space where the new variables are uncorrelated with one another. The `pre-process` class can be applied as transformation by using `"PCA"` in the `method` argument. Doing this will also force scaling of the predictors. Note that when PCA is requested, `predict.preprocess` change the column names to `PC1`, `PC 2`, and so on.
 
-Similarly, independent component analysis (ICE) can also be used to find new variables that are linear combinations of the original set such that the components are independent (as opposed to uncorrelated in PCA). The new variables will be labeled as ` IC 1 `, ` IC 2`, and so on.
+Similarly, independent component analysis (ICE) can also be used to find new variables that are linear combinations of the original set such that the components are independent (as opposed to uncorrelated in PCA). The new variables will be labeled as `IC 1`, `IC 2`, and so on.
 
 The "special sign" transformation (Serneels at all, 2006) projects the data for a predictor to the unit circle in p dimensions, where p is the number of predictors. Essentially, a vector of data is divided by its norm. The two figures below show two centered and scale descriptors from the MDRR data before an after the special sign transformation. The predictors should be centered and scaled before applying this transformation.
 
@@ -320,7 +319,7 @@ str(schedulingData)
 
 ```
 
-The data are mix of categorical and numerical predictors. Suppose we want to use the Yeo – Johnson transformation on the continuous predictors then center and scale them. Let's also suppose that we will be running a tree–based model so we might want to keep the factors as factors (as opposed to creating dummy variables). We run the function on all the columns except the last, which is the outcome.
+The data are mix of categorical and numerical predictors. Suppose we want to use the Yeo–Johnson transformation on the continuous predictors then center and scale them. Let's also suppose that we will be running a tree–based model so we might want to keep the factors as factors (as opposed to creating dummy variables). We run the function on all the columns except the last, which is the outcome.
 
 ```{r Yeo-Johnson transformation on execution times in a high performance computing environment}
 
