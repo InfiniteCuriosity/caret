@@ -9,7 +9,7 @@ output: html_document
 
 ### 3.1 Creating Dummy Variables
 
-The function `dummuVars` can be used to generate a complete (less than full rank parameterized) set of dummy variables from one or more factors. The function takes a formula and a data set and outputs an object that can be used to create the dummy variables using the predict method.
+The function `dummyVars` can be used to generate a complete (less than full rank parameterized) set of dummy variables from one or more factors. The function takes a formula and a data set and outputs an object that can be used to create the dummy variables using the predict method.
 
 For example, the `etitanic` data set in the <span style="color:blue">`earth`</span> package includes two factors: `pclass` (passenger class, with levels 1st, 2nd, and 3rd) and `sex` (with levels female, male).
 
@@ -33,7 +33,7 @@ The authors point out there is no intercept, and each factor has a dummy variabl
 
 Same idea, using the diamonds data set from tidyverse
 
-```{r Creating dummy variables using the Boston Housing data set}
+```{r Creating dummy variables using the diamonds data set from tidyverse}
 
 dummies <- dummyVars(price~., data = diamonds)
 head(predict(dummies, newdata = diamonds))
@@ -45,7 +45,7 @@ head(predict(dummies, newdata = diamonds))
 
 In some situations, the data generating mechanism can create predictors that only have a single unique value (i.e. a "zero-variance predictor"). For many models (excluding tree-based models) this may cause the model to crash or the fit to be unstable.
 
-In a similar way, predictors might have only a handful of unique values gthat occur with very low frequencies. An example is the mdrr data set, and the `nR11` descriptor (number of 11-membered rings):
+In a similar way, predictors might have only a handful of unique values that occur with very low frequencies. An example is the mdrr data set, and the `nR11` descriptor (number of 11-membered rings):
 
 ```{r}
 
@@ -53,18 +53,18 @@ data(mdrr)
 data.frame(table(mdrrDescr$nR11))
 ```
 
-The concern here is that these predictors may become zero – variance predictors when the data are split into cross – validation/bootstrap sub – summaries or that a few samples may have an undo influence on the model. These "nearest – zero – variance "predictors may need to be identified and eliminated prior to modeling.
+The concern here is that these predictors may become zero–variance predictors when the data are split into cross – validation/bootstrap sub–summaries or that a few samples may have an undo influence on the model. These "nearest – zero – variance "predictors may need to be identified and eliminated prior to modeling.
 
 To identify these types of predictors, the following two metrics can be calculated:
 
 - The frequency of the most prevalent value over the second most frequent value left process (called the "frequency ratio"), which would be near one for while behaved predictors and very large for highly balanced data and
 - The "percentage of unique values" is the Number of unique value divided by the total number of samples parentheses times 100) zero as a granularity of the data increases.
 
-If the frequency ratio was greater than a pre-– specified threshold and the unique value percentage is less than a threshold, we might consider a predictor to be near zero variance.
+If the frequency ratio was greater than a pre-specified threshold and the unique value percentage is less than a threshold, we might consider a predictor to be near zero variance.
 
-We would not want to false the identify data that have low granurity but are evenly distributed, such a from a discreet uniform distribution. Using both criteria should not false detect such predictors.
+We would not want to false the identify data that have low granularity but are evenly distributed, such a from a discreet uniform distribution. Using both criteria should not false detect such predictors.
 
-Looking at the MDRR data, the `nearZeroVar` function can be used to identify near zero-variance variables (the `saveMetrics` argument can be used to show the details and usually defauls to `FALSE`)
+Looking at the MDRR data, the `nearZeroVar` function can be used to identify near zero-variance variables (the `saveMetrics` argument can be used to show the details and usually defaults to `FALSE`)
 
 
 ```{r Applying the `nearZeroVar` function to identify near-zero-variance variables}
@@ -157,7 +157,7 @@ ltfrDesign[,-comboInfo$remove]
 
 ```
 
-These types of dependencies can arise when large numbers of binary chemical fingerprints are used to descrivbe the structure of a molecule.
+These types of dependencies can arise when large numbers of binary chemical fingerprints are used to describe the structure of a molecule.
 
 ## 3.5 The `preProcess` Function
 
@@ -186,7 +186,7 @@ testTransformed <- predict(preProcValues, test)
 
 ```
 
-Let's look at the resuls:
+Let's look at the results:
 
 ```{r Look at the results of Centering and Scaling the MDRR data set}
 
@@ -338,7 +338,7 @@ mean(schedulingData$NumPending == 0)
 
 ```
 
-For some other models, this might be an issue (especially if we resample or down-sample the data). We can add a filter to check for zero- or near zero-variance predictors prior to running the pre-processing calculations:
+For some other models, this might be an issue (especially if we re-sample or down-sample the data). We can add a filter to check for zero- or near zero-variance predictors prior to running the pre-processing calculations:
 
 ```{r Checking for zero or near zero variance}
 
