@@ -5,7 +5,7 @@ date: "4/29/2022"
 output: html_document
 ---
 
-The `caret` package (short for **C**lassification **A**nd **RE**gression **T**raining) is a set of functions that attempt to streamline the process for creating predictive models. The package conatins tools for:
+The `caret` package (short for **C**lassification **A**nd **RE**gression **T**raining) is a set of functions that attempt to streamline the process for creating predictive models. The package contains tools for:
 
 - data splitting
 - pre-processing
