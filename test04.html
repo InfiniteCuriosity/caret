@@ -11,9 +11,9 @@
 
 <meta name="author" content="Russ Conte" />
 
-<meta name="date" content="2022-05-21" />
+<meta name="date" content="2022-05-17" />
 
-<title>4. Data Splitting</title>
+<title>test of anchors</title>
 
 <script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
 // be compatible with the behavior of Pandoc < 2.8).
@@ -363,200 +363,16 @@ pre code {
 
 
 
-<h1 class="title toc-ignore">4. Data Splitting</h1>
+<h1 class="title toc-ignore">test of anchors</h1>
 <h4 class="author">Russ Conte</h4>
-<h4 class="date">2022-05-21</h4>
+<h4 class="date">2022-05-17</h4>
 
 </div>
 
 
-<div id="data-splitting" class="section level1">
-<h1>Data Splitting</h1>
-<h5>
-<a href="#id_4.1%20Simple%20Splitting%20Based%20on%20the%20Outcome">4.1
-Simple Splitting Based on the Outcome</a><br> <a href="#id_4.2%20Splitting%20Based%20on%20the%20Predictors">4.2 Splitting
-Based on the Predictors</a><br> <a href="#id_4.3%20Data%20Splitting%20for%20Time%20Series">4.3 Data
-Splitting for Time Series</a><br> <a href="#id_4.4%20Data%20Splitting%20with%20Important%20Groups">4.4 Data
-Splitting with Important Groups</a><br>
-</h5>
-<div id="simple-splitting-based-on-the-outcome" class="section level3">
-<h3><a id="4.1 Smiple Splitting Based on the Outcome"></a>4.1 Simple
-Splitting Based on the Outcome</h3>
-<p>The function <code>createDataPartition</code> can be used to create
-balanced splits of the data. If the <code>y</code> argument of this
-function is a factor, the random sampling occurs with each class and
-should preserve the overall class distrubution of the data. For example,
-o create a single 80/20% split of the iris data:</p>
-<pre class="r"><code>library(caret)</code></pre>
-<pre><code>## Loading required package: ggplot2</code></pre>
-<pre><code>## Loading required package: lattice</code></pre>
-<pre class="r"><code>trainIndex &lt;- createDataPartition(iris$Species, p = 0.8,
-                                  list = FALSE,
-                                  times = 1)
-head(trainIndex)</code></pre>
-<pre><code>##      Resample1
-## [1,]         1
-## [2,]         2
-## [3,]         3
-## [4,]         4
-## [5,]         6
-## [6,]         7</code></pre>
-<pre class="r"><code>irisTrain &lt;- iris[trainIndex,]
-irisTest &lt;- iris[trainIndex,]
-
-head(irisTest)</code></pre>
-<pre><code>##   Sepal.Length Sepal.Width Petal.Length Petal.Width Species
-## 1          5.1         3.5          1.4         0.2  setosa
-## 2          4.9         3.0          1.4         0.2  setosa
-## 3          4.7         3.2          1.3         0.2  setosa
-## 4          4.6         3.1          1.5         0.2  setosa
-## 6          5.4         3.9          1.7         0.4  setosa
-## 7          4.6         3.4          1.4         0.3  setosa</code></pre>
-<pre class="r"><code>head(irisTest)</code></pre>
-<pre><code>##   Sepal.Length Sepal.Width Petal.Length Petal.Width Species
-## 1          5.1         3.5          1.4         0.2  setosa
-## 2          4.9         3.0          1.4         0.2  setosa
-## 3          4.7         3.2          1.3         0.2  setosa
-## 4          4.6         3.1          1.5         0.2  setosa
-## 6          5.4         3.9          1.7         0.4  setosa
-## 7          4.6         3.4          1.4         0.3  setosa</code></pre>
-<p>The <code>list = FALSE</code> avoids returning the data as a list.
-This function also has an argument, <code>times</code>, that can create
-multiple splits at once; the data indices are returned in a list of
-integer vecrors. Similarly, <code>createResample</code> can be used to
-make simple bootstrap samples and <code>createFolds</code> can be used
-to generate balanced cross = validation groupings from a set of
-data.</p>
-</div>
-<div id="splitting-based-on-the-predictors" class="section level3">
-<h3><a id="4.2 Splitting Based on the Predictors"></a>4.2 Splitting
-Based on the Predictors</h3>
-<p>Also, the function <code>maxDissim</code> can be used to create
-sub-samples using a maximum dissimilarity approach. (Willett, 1999).
-Suppose there is a data set <em>A</em> with <em>m</em> samples and a
-larger data set <em>B</em> with <em>n</em> samples. We may want to
-create a sub-sample from <em>B</em> that is diverse when compared to
-<em>A</em>. To do this, for each sample in <em>B</em>, the function
-calculated the <em>m</em> dissimilarities between each point in
-<em>A</em>. The most dissimilar point in <em>B</em> is added to
-<em>A</em> and the process continues. There are many methods in R to
-calculate dissimilarity. <code>caret</code> uses the <code>proxy</code>
-package. See the manual for that package for a list of available
-measures. Also, there are many ways to calculate which sample is “most
-dissimilar”. The argument <code>obj</code> can be used to specify any
-function that returns a scalar measure. <code>caret</code> includes two
-functions, <code>minDiss</code> and <code>sumDiss</code> that can be
-used to maximize the minimum and total dissimilarities,
-respectfully.</p>
-<p>As an example, the figure below shows a scatter plot of two chemical
-descriptors for the Cox2 data. Using an initial random sample of 5
-compounds, we can select 20 more compounds from the data so that the new
-compounds are most dissimilar from the initial 5 that were specified.
-The panels in the figure show the results using several combinations of
-distance metrics and scoring functions. For these data, the distance
-measure has less of an impact than the scoring method for determining
-which compounds are most dissimilar.</p>
-<pre class="r"><code>library(mlbench)
-data(&quot;BostonHousing&quot;)
-
-testing &lt;- scale(BostonHousing[,c(&quot;age&quot;, &quot;nox&quot;)])
-set.seed(5)
-## A random sample of five data points
-startSet &lt;- sample(1:dim(testing)[1],5)
-samplePool &lt;- testing[-startSet,]
-start &lt;- testing[startSet,]
-newSamp &lt;- maxDissim(start, samplePool, n = 20)
-head(newSamp)</code></pre>
-<pre><code>## [1] 460 142 491 156 498  82</code></pre>
-</div>
-<div id="data-splitting-for-time-series" class="section level3">
-<h3><a id="4.3 Data Splitting for Time Series"></a>4.3. Data Splitting
-for Time Series</h3>
-<p>Simple random sampling of time series is probably not the best way to
-resample time series data. Hyndman and Athanasopoulos (2013) discuss
-<em>rolling forecasting origin</em> techniques that move the training
-and test sets in time. <code>caret</code> contains a function called
-<code>createTimeSlices</code> that can create the indices for this type
-of splitting.</p>
-<p>The three parameters for this type of splitting are:</p>
-<ul>
-<li><code>initialWindow</code>: the initial number of consecutive values
-in each training set sample.</li>
-<li><code>horizon</code>: The number of consecutive values in test set
-sample</li>
-<li><code>fixedWindow</code>: A logical: if <code>FALSE</code>, the
-training set always starts at the first sample and the training set size
-will vary over data splits.</li>
-</ul>
-<p>As an example, suppose we have a time series with 20 data points. We
-can fix <code>initialWidnow-5</code> and look at different settings of
-the other two arguments. In the plot below, rows in each panel
-correaspond to different data splits(i.e. resamples) and the columns
-correspond to different data points. Also, red indicates samples that
-are included in the training set and blue indicates samples in the test
-set.</p>
-</div>
-<div id="data-splitting-with-important-groups" class="section level3">
-<h3><a id="4.4 Data Splitting with Important Groups"></a>4.4 Data
-Splitting with Important Groups</h3>
-<p>In some cases there is an important qualitative factor in the data
-that should be considered during (re)sampling. For example: * in
-clinical trials, there may be hospital-to-hospital differences * with
-longitudinal or repeated measures data, subjects (or general independent
-experimental unit) may have multiples rows in the data set, etc.</p>
-<p>There may be an interest in making sure that these groups are not
-contained in the training and testing set since this may bias the test
-set performance to be more optimistic. Also, when one or more specific
-groups are held out, the resampling might capture the “ruggedness” of
-the model. In the example where clinical data is recorded over multiple
-sites, the resampling performance estimates partly measure how
-extensible the model is across sites.</p>
-<p>To split the data based on groups, <code>groupKFold</code> can be
-used:</p>
-<pre class="r"><code>set.seed(3527)
-subjects &lt;- sample(1:20, size = 80, replace = TRUE)
-table(subjects)</code></pre>
-<pre><code>## subjects
-##  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 
-##  2  3  2  5  3  5  4  5  4  4  2  5  4  2  3  3  6  7  8  3</code></pre>
-<pre class="r"><code>folds &lt;- groupKFold(subjects, k= 15)
-head(folds)</code></pre>
-<pre><code>## $Fold01
-##  [1]  2  4  5  7  8  9 10 12 13 14 15 16 18 19 20 21 22 23 25 26 27 28 29 30 31
-## [26] 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56
-## [51] 58 59 60 61 62 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80
-## 
-## $Fold02
-##  [1]  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21 23 24 25 27
-## [26] 28 29 30 31 32 33 34 35 37 38 39 40 41 42 43 44 45 46 47 48 50 51 52 53 54
-## [51] 56 57 58 59 60 61 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79
-## 
-## $Fold03
-##  [1]  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 20 21 22 23 24 25 26
-## [26] 27 28 29 30 31 32 33 34 35 36 37 39 40 41 42 43 44 45 46 47 48 49 51 52 53
-## [51] 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 78 79
-## [76] 80
-## 
-## $Fold04
-##  [1]  1  2  3  4  5  6  7  8  9 10 11 12 14 15 16 17 18 19 21 22 23 24 25 26 28
-## [26] 29 31 32 33 34 35 36 37 38 39 40 43 45 46 47 48 49 50 51 53 54 55 56 57 58
-## [51] 59 60 61 62 63 64 67 69 70 71 72 73 74 77 78 79 80
-## 
-## $Fold05
-##  [1]  1  2  3  4  5  6  7  8  9 11 12 13 14 16 17 18 19 20 21 22 23 24 25 26 27
-## [26] 28 29 30 31 32 35 36 37 38 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55
-## [51] 56 57 58 59 61 62 63 64 65 66 68 69 70 71 72 73 75 76 77 78 79 80
-## 
-## $Fold06
-##  [1]  1  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21 22 24 25 26 27
-## [26] 28 30 33 34 35 36 38 39 40 41 42 43 44 45 47 48 49 50 51 52 54 55 56 57 58
-## [51] 60 61 62 63 64 65 66 67 68 69 70 73 74 75 76 77 78 79 80</code></pre>
-<pre class="r"><code>length(folds) # a list with ten elements</code></pre>
-<pre><code>## [1] 11</code></pre>
-<p>The results in <code>folds</code> can be used as inputs into the
-<code>index</code> argument of the <code>trainControl</code>
-function.</p>
-</div>
+<div id="my-heading" class="section level3">
+<h3><a id="MyHeading"></a>My Heading</h3>
+<p>Where is my <a href="#MyHeading">heading</a>?</p>
 </div>
 
 

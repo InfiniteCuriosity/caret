@@ -37,9 +37,29 @@ head(irisTest)
 
 The `list = FALSE` avoids returning the data as a list. This function also has an argument, `times`, that can create multiple splits at once; the data indices are returned in a list of integer vecrors. Similarly, `createResample` can be used to make simple bootstrap samples and `createFolds` can be used to generate balanced cross = validation groupings from a set of data.
 
+```{r Create a 75/25 train/test split in the Diamonds data set}
+
+trainIndex <- createDataPartition(diamonds$cut, p = 0.75,
+                                  list = FALSE,
+                                  times = 1)
+head(trainIndex)
+
+```
+
+
+```{r View the data}
+
+diamondsTrain <- diamonds[trainIndex,]
+diamondsTest <- diamonds[-trainIndex,]
+head(diamondsTrain)
+head(diamondsTest)
+
+```
+
+
 
 ### <a id="4.2 Splitting Based on the Predictors"></a>4.2 Splitting Based on the Predictors###
-Also, the function `maxDissim` can be used to create sub-samples using a maximum dissimilarity approach. (Willett, 1999). Suppose there is a data set *A* with *m* samples and a larger data set *B* with *n* samples. We may want to create a sub-sample from *B* that is diverse when compared to *A*. To do this, for each sample in *B*, the function calculated the *m* dissimilarities between each point in *A*. The most dissimilar point in *B* is added to *A* and the process continues. There are many methods in R to calculate dissimilarity.   `caret` uses the `proxy` package. See the manual for that package for a list of available measures. Also, there are many ways to calculate which sample is "most dissimilar". The argument `obj` can be used to specify any function that returns a scalar measure. `caret` includes two functions, `minDiss` and `sumDiss` that can be used to maximize the minimum and total dissimilarities, respectfully.
+Also, the function `maxDissim` can be used to create sub-samples using a maximum dissimilarity approach. (Willett, 1999). Suppose there is a data set *A* with *m* samples and a larger data set *B* with *n* samples. We may want to create a sub-sample from *B* that is diverse when compared to *A*. To do this, for each sample in *B*, the function calculated the *m* dissimilarities between each point in *A*. The most dissimilar point in *B* is added to *A* and the process continues. There are many methods in R to calculate dissimilarity. `caret` uses the `proxy` package. See the manual for that package for a list of available measures. Also, there are many ways to calculate which sample is "most dissimilar". The argument `obj` can be used to specify any function that returns a scalar measure. `caret` includes two functions, `minDiss` and `sumDiss` that can be used to maximize the minimum and total dissimilarities, respectfully.
 
 As an example, the figure below shows a scatter plot of two chemical descriptors for the Cox2 data. Using an initial random sample of 5 compounds, we can select 20 more compounds from the data so that the new compounds are most dissimilar from the initial 5 that were specified. The panels in the figure show the results using several combinations of distance metrics and scoring functions. For these data, the distance measure has less of an impact than the scoring method for determining which compounds are most dissimilar.
 
@@ -56,6 +76,18 @@ samplePool <- testing[-startSet,]
 start <- testing[startSet,]
 newSamp <- maxDissim(start, samplePool, n = 20)
 head(newSamp)
+
+```
+
+```{r Finding the most dissimilar predictors in the diamonds data set}
+
+testing <- scale(diamonds[,c("price", "carat")])
+set.seed(314)
+## A random sample of five data points
+startSet <- sample(1:dim(testing)[1],10)
+samplePool <- testing[-startSet,]
+start <- testing[startSet,]
+newSample <- maxDissim(start, samplePool, n = 10)
 
 ```
 
