@@ -27,17 +27,34 @@ Contents
 [5.9 Fitting Models Without Parameter Tuning](#5.9 Fitting Models Without Parameter Tuning)<br>
 
 
-
-
-
-[](#)<br>
-
-
-
-
 ### <a id="5.1 Model Training and Parameter Tuning"></a>5.1 Model Training and Paramter Tuning###
 
+The `caret` package has several functions that attempt to streamline the model building and evaluaton process.
 
+The `train` function can be used to:
+* Evaluate, using resampling, the effect of model tuning parameters on model performance
+* Choose the "optimal" model across these parameters
+* Estimate model performance from a training set
+
+First, a specific model must be chosen. Current, 238 are available using `caret`.
+
+The first step in tuning the model (line 1 in the algorithm below) is to choose a set of parameters to evaluate. For example, if fitting a Partial Least Squares (PLS) model, the number of PLS components to evaluate must be specified:
+
+1. Define sets of model parameter values to evaluate
+2. **for** *each parameter set* **do**
+3.    **for** *each resampling iteration* **do**<br>
+    4. Hold-out Specific Items<br>
+    5. [Optional] Pre-Process the data<br>
+    6. Fit the model on the remainder<br>
+    7. Predict the Hold-out samples<br>
+8.    **end**
+9.    Calculate the average performanc across hold-out predictions
+10. **end**
+11. Determine the optimal parameter set
+12. Fit the final model to all the training data using the optimal parameter set.
+
+
+Once the model and tuning parameter values have been defined, the type of resampling should also be specified. Currently, *k*-fold cross-validation(once or repeated), leave-one-out cross-validation and bootstrap (simple estimation or the 632 rule) resampling methods can be used by `train`. After resampling, the process produces a profile of performance measure available to guide the user as to which tuning parameter values should be chosen. By default, the function augomatically chooses the tuning parameters associationed with the best values, although different algorithms can be used (see details below)
 
 ### <a id="5.3 Basic Parameter Tuning"></a>5.3 Basic Parameter Tuning###
 
