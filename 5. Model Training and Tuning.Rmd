@@ -56,6 +56,35 @@ The first step in tuning the model (line 1 in the algorithm below) is to choose 
 
 Once the model and tuning parameter values have been defined, the type of resampling should also be specified. Currently, *k*-fold cross-validation(once or repeated), leave-one-out cross-validation and bootstrap (simple estimation or the 632 rule) resampling methods can be used by `train`. After resampling, the process produces a profile of performance measure available to guide the user as to which tuning parameter values should be chosen. By default, the function augomatically chooses the tuning parameters associationed with the best values, although different algorithms can be used (see details below)
 
+
+### <a id="5.2. An Example"></a>5.2. An Example###
+
+The Sonar data are available in the `mlbench` package. Here, we load the data:
+
+```{r An example, using the Sonar data}
+
+library(mlbench)
+data(Sonar)
+str(Sonar[,1:10])
+
+```
+
+The function `createDataPartition` can be used to create a stratified random sample of data into training and test sets:
+
+```{r Create stratified random samples of the data into training and test sets}
+
+library(caret)
+set.seed(998)
+inTraining <- createDataPartition(Sonar$Class, p = 0.75, list = FALSE)
+training <- Sonar[inTraining,]
+testing <- Sonar[-inTraining,]
+
+training # 157 observations of 61 variables
+testing # 51 observations of 61 variables
+
+```
+
+
 ### <a id="5.3 Basic Parameter Tuning"></a>5.3 Basic Parameter Tuning###
 
 
