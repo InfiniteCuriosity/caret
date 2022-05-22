@@ -133,18 +133,93 @@ Many models utilize random numbers during the phase where parameters are estimat
 * When the models are created *inside of resampling*, the seeds can also be set. While setting the seed prior to calling `train` may guarantee that the same rendom numbers are used, this is unlikely to be the case when parallel processing is used (depending on which technology is utilized). To set the model fitting seeds, `trainControl` has an additional argument called `seeds` that can be used. The value for this argument is a list of integer vectors that are used as seeds. The help oage for `trainControl` describes the appropriate format for this option.
 
 
-
 ### <a id="5.5 Customizing the Tuning Process"></a>5.5 Customizing the Tuning Process###
 
+There are a few ways to customize the process of selecting tuning/complexity parameters and building the final model.
 
 #### <a id="5.5.1 Pre-Processing Options"></a>5.5.1 Pre-Processing Options###
 
+As previously mentioned, `train` can pre-process the data in various ways prior to model fitting. The function `preProcess` is automatically used. The function can be used for centering and scaling imputation (see details below) applying the spatial sign transformation and feature extraction via principal component analysis or independent component analysis.
+
+To specify what pre-processing should occur, the `train` function has an argument called `preProcess`. This argument takes a character string of methods that would normally be passed to the `method` argument of the `preProcess` function. Additional options to the `preProcess` function can be passed via the `trainControl` function.
+
+These processing steps would be applied during any predictions generated using `predict.train`, `extractPrediction` or `extractProbs` (see details later in this document). The pre-processing would **not** be applied to predictions that directly use the `object$finalModel` object.
+
+For imputation, there are three methods currently implemented:
+
+* *k*-nearest neighbors takes a sample with missing values and finds the *k* closest samples in the training set. The average of the *k* training set values for that predictor are used as a substitute for the original data. When calculating the distrances to the training set samples, the predictors used in the calculation are the ones with no missing values for that sample and no missing values in the training set.
+* Another approach is to fit a bagged tree model for each predictor using the training set samples. This is usually a fairly accurate model and can handle missing values. When a predictor for a sample requires imputation, the values for the other predcitors are fed through the bagged tree and the prediction is used as the new value. The model van have significant computational cost.
+* The median of the predictor's training set, PCA and ICA models only use complete samples.
 
 
 #### <a id="5.5.2 Alternate Tuning Grids"></a>5.5.2 Alternate Tuning Grids###
 
+The tuning parameter grid can be specified by the user. The argument `tuneGrid` can take a data frame with columns for each tuning parameter. The column names should be the same as the fitting function's arguments. For the previously mentioned RDA a example, the names would be `gamma` and `lambda`. `train` will tune the model over each combination of values in the rows
+
+For the boosted tree model, we can fix the learning rate and evaluate more than three values of `n.trees`:
+
+```{r gbm model}
+
+gbmGrid <- expand.grid(interaction.depth = c(1,5,9),
+                       n.trees = (1:30) * 50,
+                       shrinkage = 0.1,
+                       n.minobsinnode = 20)
+
+nrow(gbmGrid)
+
+set.seed(825)
+
+gbmFit2 <- train(Class ~ ., data = training,
+                 method = "gbm",
+                 trControl = fitControl,
+                 verbose = FALSE,
+                 ## Now specify the exact models to evaluate:
+                 tuneGrid = gbmGrid)
+
+gbmFit2
+```
+
 
 #### <a id="5.5.3 Plotting the Resampling Profile"></a>5.5.3 Plotting the Resampling Profile###
+
+The `plot` function can be used to examine the relationship between estimates of performance and the tuning parameters. For example, a simple invocation of the function shows the results for the first performance measure::
+
+```{r Plotting the resampling profile}
+
+trellis.par.set(caretTheme())
+plot(gbmFit2)
+
+```
+
+Other performance metrics can be shown using the `metric` option:
+
+```{r Other performance metrics}
+
+trellis.par.set(caretTheme())
+plot(gbmFit2, metric = "Kappa")
+
+```
+
+Other types of plots are also available. See `?plot.train` for more details. The code below shows a heatmap of the results:
+
+```{r Heatmap of the results}
+
+trellis.par.set(caretTheme())
+plot(gbmFit2, metric = "Kappa", plotType = "level", scales = list(x = list(rot = 90)))
+
+```
+
+A `ggplot` method can also be used:
+
+```{r using ggplot to plot the results}
+
+ggplot(gbmFit2)
+
+```
+
+There are also plot functions that show more detailed representations of the resample the estimates. See `?xyplot.train` for more details.
+
+From these plants, a different set of tuning parameters may be desired. To change the final values without starting the whole process again, the ` update that train ` can be used to refer to the final model see `?update.train`
 
 
 #### <a id="5.5.4 The `trainControl` Function"></a>5.5.4 The `trainControl` Function###
