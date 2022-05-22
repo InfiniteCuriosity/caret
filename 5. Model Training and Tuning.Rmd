@@ -512,4 +512,39 @@ dotplot(difValues)
 
 ### <a id="5.9 Fitting Models Without Parameter Tuning"></a>Fitting Models Without Parameter Tuning###
 
+In cases where the model tuning values are known, `train` can be used to fit the model to the entire training set without any resampling or parameter tuning. Using the `method = "none"` option in `trainControl` can be used. For example:
+
+```{r Fitting models without parameter tuning}
+
+fitControl <- trainControl(method = "none", classProbs = TRUE)
+
+set.seed(825)
+
+gbmFit4 <- train(Class ~ ., data = training,
+                 method = "gbm",
+                 trControl = fitControl,
+                 verbose = FALSE,
+                 # Only a single model can be passed to the function when no resampling is used:
+                 tuneGrid = data.frame(interaction.depth = 4,
+                                       n.trees = 100,
+                                       shrinkage = 0.1,
+                                       n.minobsinnode = 20),
+                 metric = "ROC")
+gbmFit4
+
+```
+
+Note that `plot.train`, `resamples`, `confusionMatris.train` and several other functions will not work with this object, but `predict.train` and others will:
+
+```{r Predict without parameter tuning}
+
+predict(gbmFit4, newdata = head(testing))
+
+```
+
+```{r Predicting probabilities of metal or rock}
+
+predict(gbmFit4, newdata = head(testing), type = "prob")
+
+```
 
