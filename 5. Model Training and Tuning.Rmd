@@ -79,15 +79,51 @@ inTraining <- createDataPartition(Sonar$Class, p = 0.75, list = FALSE)
 training <- Sonar[inTraining,]
 testing <- Sonar[-inTraining,]
 
-training # 157 observations of 61 variables
-testing # 51 observations of 61 variables
+training[1:10, 1:10] # 157 observations of 61 variables
+testing[1:10, 1:10] # 51 observations of 61 variables
 
 ```
 
 
 ### <a id="5.3 Basic Parameter Tuning"></a>5.3 Basic Parameter Tuning###
 
+By default, simple bootstrap resampling is used for line 3 in the algorithm above. Other methods are available, such as *K*-fold cross-validation, leave-one-out, etc. The function, `trainControl` can be used to specify the type of resampling:
 
+```{r Using trainControl to set up resampling}
+
+fitControl <- trainControl(## 10-fold cross-validation,
+                            method = "repeatedcv",
+                            number = 10,
+                            ## repeated ten times,
+                            repeats = 10)
+
+```
+
+
+More information about `trainControl` is given in a section below.
+
+The first two arguments to `train` are the predictor and outcome data objects, respectively. The third argument, `method`, specifies the type of model. To illustrate, we will fit a boosted tree model via the `gbm` package. The basic syntax for fitting this model using repeated cross-validation is shown below:
+
+```{r Fitting a boosted tree using gbm}
+
+set.seed(825)
+gbmfit1 <- train(Class~., data = training,
+                 method = "gbm",
+                 trControl = fitControl,
+                 ## This last option is actually one for gbm() that passes through
+                 verbose = FALSE)
+gbmfit1
+
+```
+
+For a gradient boosting machine (GBM) model, there are three (?) main tuning parameters:
+
+* number of iterations, i.e. trees, (called `n.trees` in the `gbm` function)
+* complexity of the tree, called `interaction.depth`
+* learning rate: how quickly the algorithm adapts, called `shrinkage`
+* the minimum number of training set samples in a note to commence splitting(`n.minobsinnode`)
+
+The default values tested for this model are shown in the first two columns (`shrinkage` and `n.minobsinnode` are not shown because the grid set of candidate models all use a single value for these tuning parameters). The column labeled `accuracy` is the overall agreement rate averaged over cross-validation iterations. The agreement standard deviation is also calculated from the cross-validation results. The column, `Kappa` is Cohen's (unweighted) Kappa statistic averaged across the resampling results. `train` works with specific models. For these models, `train` can automatically create a grid of tuning parameters. By default, if *p* is the number of tuning parameters, the grid size is 3^p. As another example, regularized discriminant analysis (RDA) models have two parameters (`gamma` and `lambda`), both of which lie between zero and one. The default trainng grid would produce nine combinations in this two-dimensional space.
 
 ### <a id="5.4 Notes on Reproducibility"></a>5.4 Notes on Reproducibility###
 
