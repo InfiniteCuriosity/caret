@@ -814,12 +814,12 @@ final model see <code>?update.train</code></p>
 further control how models are created, with possible values :</p>
 <ul>
 <li><p><code>method</code>: The sampling method : <code>&quot;boot&quot;</code> ,
-<code>&quot;cv&quot;</code>, <code>&quot;LOOCV&quot;</code>, <code>&quot;LOGCV</code>,
+<code>&quot;cv&quot;</code>, <code>&quot;LOOCV&quot;</code>, <code>&quot;LGOCV</code>,
 <code>&quot;repeatedcv</code>, <code>&quot;timeslice&quot;</code>, <code>&quot;none&quot;</code>,
 and <code>&quot;oob&quot;</code>.The last value, out of bag estimates, can only be
 used by random forest, bagged trees, bagged earth, bagged flexible
-discriminant analysis, or conditional three models. GBM models are not
-included. Also, for leave one one out cross validation, no uncertainty
+discriminant analysis, or conditional tree models. GBM models are not
+included. Also, for leave-one-out cross validation, no uncertainty
 estimates are given for the resampled performances measures.</p></li>
 <li><p><code>number</code> and <code>repeats</code>: <code>number</code>
 controls with the number of folds in <em>K</em>-fold cross validation or
@@ -867,6 +867,10 @@ available).</p></li>
 <div id="alternate-performance-metrics" class="section level4">
 <h4><a id="5.5.5 Alternate Performance Metrics"></a>5.5.5 Alternate
 Performance Metrics</h4>
+<p>The user can change the metric used to determine the best settings.
+By default, RMSE, <em>R</em>^2, and the mean absolute error (MAE) are
+computed for regression while accuracy and Kappa are computed for
+classification.</p>
 </div>
 </div>
 <div id="choosing-the-final-model" class="section level3">

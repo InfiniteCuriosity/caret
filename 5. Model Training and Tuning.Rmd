@@ -255,9 +255,54 @@ The function `trainControl` generates parameters that further control how models
 There are several other options not discussed here.
 
 
-
-
 #### <a id="5.5.5 Alternate Performance Metrics"></a>5.5.5 Alternate Performance Metrics###
+
+The user can change the metric used to determine the best settings. By default, RMSE, $R^2$, and the mean absolute error (MAE) are computed for regression while accuracy and Kappa are computed for classification. Also by default, the parameter values are chosen using RMSE and accuracy, respectively for regression and classification. The `metric` argument of the `train` function allows the user to control which of the optimality criterion is used. For example, in problems where there is a low percentage of samples in one class, using `metric = "Kappa"` can improve the quality of the final model.
+
+If none of these parameters are satisfactory, the user can also compute custom performance metrics. The `trainControl` function as an argument called `summaryFunction` especially as a function for computing performance the function for computing performance. The function should have these arguments:
+
+* ` Data ` as a reference for a data frame or matrix with columns called ` OBS ` ` PRAD ` for the observed and predicted outcome values (either numeric data for regression or character values for classification). Currently, class probabilities are not passed to the function. The values in data or the held out predictions (and the associated reference values) for a single combination of tuning parameters. If they ` class problemRight ` aAdditionally if the ` recipe ` method for ` train ` was used, other variables that used in the model will also be included. This can be accomplished by adding a role in the recipe of ` "performance bar" `. And example is given in the recipe section of the site.
+* `lev` is a character string tht has the outcome factor levels taken from the training data. For regression, a value of `NULL` is passed into the function.
+* `model` is a character string for the model being used (i.e. the value passed to the `method` argument of `train`).
+
+The output to the function should be a vector of numeric summary metrics with non-null names. By default, `train` evaluates classification models in terms of the predicted classes. Optionally, class probabilities can also be used to measure performance. To obtain predicted class probabilities within the resampling process, the argument `classProbs` and `trainControl` must be set to `back to back back`TRUE`. This merges columns of probabilities the predictions generated from each resample (there is a column per class and the column names are the class names).
+
+As shown in the last section, custom functions can be used to calculate performance scores that are averaged over the resamples. Another builg-in function, `twoClassSummary`, will compute the sensitivity, specificity and area under the ROC curve:
+
+```{r twoClassSummary}
+
+head(twoClassSummary)
+
+```
+
+To rebuild the boosted tree model using this criterion, we can see the relationship between the tuning parameters and the area under the ROC curve using the following code:
+
+```{r Rebuild the boosted tree model}
+
+fitControl <- trainControl(method = "repeatedcv",
+                           number = 10,
+                           repeats = 10,
+                           ## Estimates class probabilities
+                           classProbs = TRUE,
+                           ## Evaluate performance using the following function
+                           summaryFunction = twoClassSummary)
+
+set.seed(825)
+gbmfit3 <- train(Class ~ ., data = training,
+                 method = "gbm",
+                 trControl = fitControl,
+                 verbose = FALSE,
+                 tuneGrid = gbmGrid,
+                 # Specify which metric to optimize
+                 metric = "ROC")
+
+gbmfit3$bestTune # The optimal model
+
+which(gbmfit3$results$ROC >= 0.9213)
+
+gbmfit3$results[20,]
+
+```
 
 
 ### <a id="5.6 Choosing the Final Model"></a>5.6 Choosing the Final Model###
