@@ -1,0 +1,82 @@
+---
+title: "5. Model Training and Tuning"
+author: "Russ Conte"
+date: '2022-05-22'
+output: html_document
+---
+
+# Model Training and Tuning
+
+Contents
+
+[5.1 Model Training and Parameter Tuning](#Model Training and Parameter Tuning)<br>
+[5.2 An Example](#5.2 An Example)<br>
+[5.3 Basic Parameter Tuning](#5.3 Basic Parameter Tuning)<br>
+[5.4 Notes on Reproducibility](#5.4 Notes on Reproducibility)<br>
+[5.5 Customizing the Tuning Process](#5.5 Customizing the Tuning Process)<br>
+[5.5.1 Pre-Processing Options](#5.5.1 Pre-Processing Option)<br>
+[5.5.2 Alternate Tuning Grids](#Alternate Tuning Grids)<br>
+[5.5.3 Plotting the Resampling Profile](#Plotting the Resampling Profile)<br>
+[5.5.4 The `trainControl` Function](#5.5.4 The `trainControl` Function)<br>
+[5.5.5 Alternate Performance Metrics](#Alkternate Performance Metrics)<br>
+[5.6 Choosing the Final Model](#Choosing the Final Model)<br>
+[5.7 Extracting Predictions and Class Probabilities](#Extracting Predictions and Class Probabilities)<br>
+[5.8 Exploring and Comparing Resampling Distrubutions](#Exploring and Comparing Resampling Distributions)<br>
+[5.8.1 Within-Model](#5.8.1 Within-Model)<br>
+[5.8.2 Between-Models](#Between-Models)<br>
+[5.9 Fitting Models Without Parameter Tuning](#5.9 Fitting Models Without Parameter Tuning)<br>
+
+
+
+
+
+[](#)<br>
+
+
+
+
+### <a id="5.1 Model Training and Parameter Tuning"></a>5.1 Model Training and Paramter Tuning###
+
+
+
+### <a id="5.3 Basic Parameter Tuning"></a>5.3 Basic Parameter Tuning###
+
+
+
+### <a id="5.4 Notes on Reproducibility"></a>5.4 Notes on Reproducibility###
+
+
+
+### <a id="5.5 Customizing the Tuning Process"></a>5.5 Customizing the Tuning Process###
+
+
+### <a id="5.5.1 Pre-Processing Options"></a>5.5.1 Pre-Processing Options###
+
+
+
+### <a id="5.5.2 Alternate Tuning Grids"></a>5.5.2 Alternate Tuning Grids###
+
+
+### <a id="5.5.3 Plotting the Resampling Profile"></a>5.5.3 Plotting the Resampling Profile###
+
+
+### <a id="5.5.4 The `trainControl` Function"></a>5.5.4 The `trainControl` Function###
+
+
+### <a id="5.5.5 Alternate Performance Metrics"></a>5.5.5 Alternate Performance Metrics###
+
+
+### <a id="5.6 Choosing the Final Model"></a>5.6 Choosing the Final Model###
+
+
+### <a id="5.7 Extracting Predictions and Class Probabilities"></a>5.7 Extracting Predictions and Class Probabilities###
+
+
+
+### <a id="5.8.2 Between-Models"></a>5.8.2 Between-Models###
+
+
+
+### <a id="5.9 Fitting Models Without Parameter Tuning"></a>Fitting Models Without Parameter Tuning###
+
+

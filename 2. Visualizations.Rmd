@@ -5,7 +5,7 @@ date: "4/29/2022"
 output: html_document
 ---
 
-The `featurePlot` function is a wrappter for different `lattice` plots to visualize the data. For example, the following figures show the default plot for continuous outcomes generated using the `featurePlot` function.
+The `featurePlot` function is a wrapper for different `lattice` plots to visualize the data. For example, the following figures show the default plot for continuous outcomes generated using the `featurePlot` function.
 
 For classification data sets, the <span style="color:blue">`iris`</span> data are used for illustration.
 
@@ -36,14 +36,16 @@ featurePlot(x = iris[,1:4],
 
 ### Scatterplot Matrix with Ellipses
 
-```{r Scatterplot Matrix withEllipses}
+```{r Scatterplot Matrix of iris data with Ellipses}
 
 featurePlot(x = iris[,1:4],
              y = iris$Species,
             plot = "ellipse",
             ## Add a key at the top of the data visualization
             auto.key = list(columns = 3))
+```
 
+```{r scatterplot for mpg data with ellipses}
 # A working example of the same solution using the mpg data set from tidyverse:
 
 mpg1 <- mpg %>% 
@@ -69,6 +71,7 @@ featurePlot(x = iris[1:4],
 
 ```{Repeat density plots, but pass in options to xyplot() to make it prettier}
 
+transparentTheme(trans = 0.9)
 featurePlot(x = iris[,1:4],
             y = iris$Species,
             plot = "density",
@@ -78,7 +81,6 @@ featurePlot(x = iris[,1:4],
             pch = "|",
             layout = c(4,1),
             auto.key = list(columns = 3))
-
 
 ```
 
@@ -155,7 +157,7 @@ featurePlot(x = BostonHousing[,regVar],
 
 ```
 
-Note that the x-axis scales are different from one another. The function automaticallyuses `scales = list(y = list(relation = "free`)) so you don't have to add it. We can also pass in options to the `lattice` function `xyplot`. For example, we can add a scatter plot smoother by passing in new options:
+Note that the x-axis scales are different from one another. The function automatically uses `scales = list(y = list(relation = "free`)) so you don't have to add it. We can also pass in options to the `lattice` function `xyplot`. For example, we can add a scatter plot smoother by passing in new options:
 
 ```{r}
 featurePlot(x = BostonHousing[, regVar],
