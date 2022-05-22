@@ -485,10 +485,113 @@ training[1:10, 1:10] # 157 observations of 61 variables</code></pre>
 <div id="basic-parameter-tuning" class="section level3">
 <h3><a id="5.3 Basic Parameter Tuning"></a>5.3 Basic Parameter
 Tuning</h3>
+<p>By default, simple bootstrap resampling is used for line 3 in the
+algorithm above. Other methods are available, such as <em>K</em>-fold
+cross-validation, leave-one-out, etc. The function,
+<code>trainControl</code> can be used to specify the type of
+resampling:</p>
+<pre class="r"><code>fitControl &lt;- trainControl(## 10-fold cross-validation,
+                            method = &quot;repeatedcv&quot;,
+                            number = 10,
+                            ## repeated ten times,
+                            repeats = 10)</code></pre>
+<p>More information about <code>trainControl</code> is given in a
+section below.</p>
+<p>The first two arguments to <code>train</code> are the predictor and
+outcome data objects, respectively. The third argument,
+<code>method</code>, specifies the type of model. To illustrate, we will
+fit a boosted tree model via the <code>gbm</code> package. The basic
+syntax for fitting this model using repeated cross-validation is shown
+below:</p>
+<pre class="r"><code>set.seed(825)
+gbmfit1 &lt;- train(Class~., data = training,
+                 method = &quot;gbm&quot;,
+                 trControl = fitControl,
+                 ## This last option is actually one for gbm() that passes through
+                 verbose = FALSE)
+gbmfit1</code></pre>
+<pre><code>## Stochastic Gradient Boosting 
+## 
+## 157 samples
+##  60 predictor
+##   2 classes: &#39;M&#39;, &#39;R&#39; 
+## 
+## No pre-processing
+## Resampling: Cross-Validated (10 fold, repeated 10 times) 
+## Summary of sample sizes: 141, 142, 141, 142, 141, 142, ... 
+## Resampling results across tuning parameters:
+## 
+##   interaction.depth  n.trees  Accuracy   Kappa    
+##   1                   50      0.7935784  0.5797839
+##   1                  100      0.8171078  0.6290208
+##   1                  150      0.8219608  0.6383173
+##   2                   50      0.8041912  0.6027771
+##   2                  100      0.8296176  0.6544713
+##   2                  150      0.8283627  0.6520181
+##   3                   50      0.8110343  0.6170317
+##   3                  100      0.8307941  0.6564891
+##   3                  150      0.8317010  0.6590524
+## 
+## Tuning parameter &#39;shrinkage&#39; was held constant at a value of 0.1
+## 
+## Tuning parameter &#39;n.minobsinnode&#39; was held constant at a value of 10
+## Accuracy was used to select the optimal model using the largest value.
+## The final values used for the model were n.trees = 150, interaction.depth =
+##  3, shrinkage = 0.1 and n.minobsinnode = 10.</code></pre>
+<p>For a gradient boosting machine (GBM) model, there are three (?) main
+tuning parameters:</p>
+<ul>
+<li>number of iterations, i.e. trees, (called <code>n.trees</code> in
+the <code>gbm</code> function)</li>
+<li>complexity of the tree, called <code>interaction.depth</code></li>
+<li>learning rate: how quickly the algorithm adapts, called
+<code>shrinkage</code></li>
+<li>the minimum number of training set samples in a note to commence
+splitting(<code>n.minobsinnode</code>)</li>
+</ul>
+<p>The default values tested for this model are shown in the first two
+columns (<code>shrinkage</code> and <code>n.minobsinnode</code> are not
+shown because the grid set of candidate models all use a single value
+for these tuning parameters). The column labeled <code>accuracy</code>
+is the overall agreement rate averaged over cross-validation iterations.
+The agreement standard deviation is also calculated from the
+cross-validation results. The column, <code>Kappa</code> is Cohen’s
+(unweighted) Kappa statistic averaged across the resampling results.
+<code>train</code> works with specific models. For these models,
+<code>train</code> can automatically create a grid of tuning parameters.
+By default, if <em>p</em> is the number of tuning parameters, the grid
+size is 3^p. As another example, regularized discriminant analysis (RDA)
+models have two parameters (<code>gamma</code> and <code>lambda</code>),
+both of which lie between zero and one. The default trainng grid would
+produce nine combinations in this two-dimensional space.</p>
 </div>
 <div id="notes-on-reproducibility" class="section level3">
 <h3><a id="5.4 Notes on Reproducibility"></a>5.4 Notes on
 Reproducibility</h3>
+<p>Many models utilize random numbers during the phase where parameters
+are estimated. Also, the resampling indices are chosen using random
+numbers. There are two main ways to control the randomness in order to
+assure reproducible results:</p>
+<ul>
+<li>There are two approaches to ensuring that the same
+<em>resamples</em> are used between calls to <code>train</code>. The
+first is to use <code>set.seed</code> just prior to calling
+<code>train</code>. The first use of random numbers is to create the
+resampling information. Alternatively, if you would like to use specific
+splits of the data, the <code>index</code> argument of the
+<code>trainControl</code> function can be used. This is briefly
+discussed below.</li>
+<li>When the models are created <em>inside of resampling</em>, the seeds
+can also be set. While setting the seed prior to calling
+<code>train</code> may guarantee that the same rendom numbers are used,
+this is unlikely to be the case when parallel processing is used
+(depending on which technology is utilized). To set the model fitting
+seeds, <code>trainControl</code> has an additional argument called
+<code>seeds</code> that can be used. The value for this argument is a
+list of integer vectors that are used as seeds. The help oage for
+<code>trainControl</code> describes the appropriate format for this
+option.</li>
+</ul>
 </div>
 <div id="customizing-the-tuning-process" class="section level3">
 <h3><a id="5.5 Customizing the Tuning Process"></a>5.5 Customizing the
