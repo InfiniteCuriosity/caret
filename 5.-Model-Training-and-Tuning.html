@@ -868,14 +868,165 @@ available).</p></li>
 <h4><a id="5.5.5 Alternate Performance Metrics"></a>5.5.5 Alternate
 Performance Metrics</h4>
 <p>The user can change the metric used to determine the best settings.
-By default, RMSE, <em>R</em>^2, and the mean absolute error (MAE) are
-computed for regression while accuracy and Kappa are computed for
-classification.</p>
+By default, RMSE, <span class="math inline">\(R^2\)</span>, and the mean
+absolute error (MAE) are computed for regression while accuracy and
+Kappa are computed for classification. Also by default, the parameter
+values are chosen using RMSE and accuracy, respectively for regression
+and classification. The <code>metric</code> argument of the
+<code>train</code> function allows the user to control which of the
+optimality criterion is used. For example, in problems where there is a
+low percentage of samples in one class, using
+<code>metric = &quot;Kappa&quot;</code> can improve the quality of the final
+model.</p>
+<p>If none of these parameters are satisfactory, the user can also
+compute custom performance metrics. The <code>trainControl</code>
+function as an argument called <code>summaryFunction</code> especially
+as a function for computing performance the function for computing
+performance. The function should have these arguments:</p>
+<ul>
+<li><code>Data</code> as a reference for a data frame or matrix with
+columns called <code>OBS</code> <code>PRAD</code> for the observed and
+predicted outcome values (either numeric data for regression or
+character values for classification). Currently, class probabilities are
+not passed to the function. The values in data or the held out
+predictions (and the associated reference values) for a single
+combination of tuning parameters. If they
+<code>class problemRight</code> aAdditionally if the <code>recipe</code>
+method for <code>train</code> was used, other variables that used in the
+model will also be included. This can be accomplished by adding a role
+in the recipe of <code>&quot;performance bar&quot;</code>. And example is given in
+the recipe section of the site.</li>
+<li><code>lev</code> is a character string tht has the outcome factor
+levels taken from the training data. For regression, a value of
+<code>NULL</code> is passed into the function.</li>
+<li><code>model</code> is a character string for the model being used
+(i.e. the value passed to the <code>method</code> argument of
+<code>train</code>).</li>
+</ul>
+<p>The output to the function should be a vector of numeric summary
+metrics with non-null names. By default, <code>train</code> evaluates
+classification models in terms of the predicted classes. Optionally,
+class probabilities can also be used to measure performance. To obtain
+predicted class probabilities within the resampling process, the
+argument <code>classProbs</code> and <code>trainControl</code> must be
+set to <code>back to back back</code>TRUE`. This merges columns of
+probabilities the predictions generated from each resample (there is a
+column per class and the column names are the class names).</p>
+<p>As shown in the last section, custom functions can be used to
+calculate performance scores that are averaged over the resamples.
+Another builg-in function, <code>twoClassSummary</code>, will compute
+the sensitivity, specificity and area under the ROC curve:</p>
+<pre class="r"><code>head(twoClassSummary)</code></pre>
+<pre><code>##                                                                                                                    
+## 1 function (data, lev = NULL, model = NULL)                                                                        
+## 2 {                                                                                                                
+## 3     if (length(lev) &gt; 2) {                                                                                       
+## 4         stop(paste(&quot;Your outcome has&quot;, length(lev), &quot;levels. The twoClassSummary() function isn&#39;t appropriate.&quot;))
+## 5     }                                                                                                            
+## 6     requireNamespaceQuietStop(&quot;pROC&quot;)</code></pre>
+<p>To rebuild the boosted tree model using this criterion, we can see
+the relationship between the tuning parameters and the area under the
+ROC curve using the following code:</p>
+<pre class="r"><code>fitControl &lt;- trainControl(method = &quot;repeatedcv&quot;,
+                           number = 10,
+                           repeats = 10,
+                           ## Estimates class probabilities
+                           classProbs = TRUE,
+                           ## Evaluate performance using the following function
+                           summaryFunction = twoClassSummary)
+
+set.seed(825)
+gbmfit3 &lt;- train(Class ~ ., data = training,
+                 method = &quot;gbm&quot;,
+                 trControl = fitControl,
+                 verbose = FALSE,
+                 tuneGrid = gbmGrid,
+                 # Specify which metric to optimize
+                 metric = &quot;ROC&quot;)
+
+gbmfit3$bestTune # The optimal model</code></pre>
+<pre><code>##    n.trees interaction.depth shrinkage n.minobsinnode
+## 37     350                 5       0.1             20</code></pre>
+<pre class="r"><code>which(gbmfit3$results$ROC &gt;= 0.9213)</code></pre>
+<pre><code>## [1] 20</code></pre>
+<pre class="r"><code>gbmfit3$results[20,]</code></pre>
+<pre><code>##    shrinkage interaction.depth n.minobsinnode n.trees       ROC    Sens
+## 37       0.1                 5             20     350 0.9213616 0.87125
+##         Spec      ROCSD   SensSD    SpecSD
+## 37 0.8094643 0.07420965 0.121239 0.1634282</code></pre>
 </div>
 </div>
 <div id="choosing-the-final-model" class="section level3">
 <h3><a id="5.6 Choosing the Final Model"></a>5.6 Choosing the Final
 Model</h3>
+<p>Another method for customizing the tuning process is to modify the
+algorithm that is used to select the “best” parameter values, given the
+performance numbers. By default, the <code>train</code> function chooses
+the model with the largest performance value (or smallest, Fermin
+squared error in regression modelsOther schemes for selecting models can
+be used Bremen at all (1984) suggested The “one standard error rule” for
+simple tree-based models. In this case, the model with the best
+performance value is identified and, using resampling, we can estimate
+the standard error of performance. The final model used was the simplest
+model within one standard error of the (empirically) best model. With
+simple trees this makes sense, since these models will start to overfit
+as they become more and more specific to the training data.</p>
+<p><code>train</code> allows the user to specify alternate rules for
+selecting the final model. The argument <code>select function</code> can
+be used to supply a function to algorithmically determine the final
+model. There are three existing functions in the package:
+<code>best</code> chooses the largest/smallest value, <code>oneSE</code>
+attempts to capture the spirit of Breiman et at (1984) tand
+<code>tolerance</code> selects the least complex model within some
+percent tolerance of the best value. See <code>?best</code> for more
+details.</p>
+<p>User-defined functions can be used, as long as they have the
+following arguments:</p>
+<ul>
+<li><code>x</code> is a data frame containing the tune parameters and
+their associated performance metrics. Each row corresponds to a
+different tuning parameter combination.</li>
+<li><code>metric</code> is a character string indicating which
+performance metric should be optimized (this is passed in directly from
+the <code>metric</code> argument of <code>train</code>).</li>
+<li><code>maximize</code> is a single logical value indicating whether
+larger values of the performance metric are better (this is also
+directly passed from the call to <code>train</code>).</li>
+</ul>
+<p>The function should output a single integer indicating which row in
+<code>x</code> is chosen.</p>
+<p>As an example, if we choose the previous boosted tree model on the
+basis of overall accuracy, we would choose: end. Trees equals 1450,
+interaction dot depth equals five, shrinkage equals zero. One, and that
+men abs in node equals 20. However, the scale in this plot is fairly
+tight, with accuracy value arranging from zero. 86320. 922.Less complex
+model (e.g. if you are, Michelle are trees right princess might also
+yelled acceptable accuracy.</p>
+<p>The tolerance function can be used to find a less complex model based
+on <span class="math inline">\(\frac{x - x_{best}}{x_{best} x
+100}\)</span>, which is the percent difference. For example, to select
+parameter values based on a 2% loss of performance:</p>
+<pre class="r"><code>whichTwoPct &lt;- tolerance(gbmfit3$results, metric = &quot;ROC&quot;,
+                         tol = 2, maximize = TRUE)
+cat(&quot;best model within 2 pct of best:\n&quot;)</code></pre>
+<pre><code>## best model within 2 pct of best:</code></pre>
+<pre class="r"><code>gbmfit3$results[whichTwoPct, 1:6]</code></pre>
+<pre><code>##    shrinkage interaction.depth n.minobsinnode n.trees       ROC      Sens
+## 32       0.1                 5             20     100 0.9139707 0.8645833</code></pre>
+<p>This indicates that we can get a less complex model with an area
+under the curve ROC of 0.914 (compared to the “pick the best” value of
+0.922).</p>
+<p>The main issue with these functions is related to ordering the models
+from simplest to complex. In some cases this is easy(e.g. Simple trees,
+partial least squares. But in case of such this model, the ordering of
+models is subjective. For example, is a boosted three model using 100
+iterations and a three depth of two more complex than one with 50
+iterations in a three depth of eight? The package makes some choices
+regarding these order. In the case of boosted trees, the package assumes
+that increasing the number of iterations adds complexity at a faster
+rate than increasing the tree depth, some models are ordered on the
+number of iterations then ordered on depth. See <code>?best</code> for
+more examples for specific models.</p>
 </div>
 <div id="extracting-predictions-and-class-probabilities" class="section level3">
 <h3><a id="5.7 Extracting Predictions and Class Probabilities"></a>5.7

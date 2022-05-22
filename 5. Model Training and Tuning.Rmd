@@ -307,14 +307,208 @@ gbmfit3$results[20,]
 
 ### <a id="5.6 Choosing the Final Model"></a>5.6 Choosing the Final Model###
 
+Another method for customizing the tuning process is to modify the algorithm that is used to select the "best" parameter values, given the performance numbers. By default, the ` train ` function chooses the model with the largest performance value (or smallest, Fermin squared error in regression modelsOther schemes for selecting models can be used Bremen at all (1984) suggested The "one standard error rule" for simple tree-based models. In this case, the model with the best performance value is identified and, using resampling, we can estimate the standard error of performance. The final model used was the simplest model within one standard error of the (empirically) best model. With simple trees this makes sense, since these models will start to overfit as they become more and more specific to the training data.
+
+`train` allows the user to specify alternate rules for selecting the final model. The argument `select function` can be used to supply a function to algorithmically determine the final model. There are three existing functions in the package: `best` chooses the largest/smallest value, `oneSE` attempts to capture the spirit of Breiman et at (1984) tand `tolerance` selects the least complex model within some percent tolerance of the best value. See `?best` for more details.
+
+User-defined functions can be used, as long as they have the following arguments:
+
+* `x` is a data frame containing the tune parameters and their associated performance metrics. Each row corresponds to a different tuning parameter combination.
+* `metric` is a character string indicating which performance metric should be optimized (this is passed in directly from the `metric` argument of `train`).
+* `maximize` is a single logical value indicating whether larger values of the performance metric are better (this is also directly passed from the call to `train`).
+
+The function should output a single integer indicating which row in `x` is chosen.
+
+As an example, if we choose the previous boosted tree model on the basis of overall accuracy, we would choose: end. Trees equals 1450, interaction dot depth equals five, shrinkage equals zero. One, and that men abs in node equals 20. However, the scale in this plot is fairly tight, with accuracy value arranging from zero. 86320. 922.Less complex model (e.g. if you are, Michelle are trees right princess might also yelled acceptable accuracy.
+
+The tolerance function can be used to find a less complex model based on $\frac{x - x_{best}}{x_{best} x 100}$, which is the percent difference. For example, to select parameter values based on a 2% loss of performance:
+
+```{r Finding the best model within a 2% loss of performance}
+
+whichTwoPct <- tolerance(gbmfit3$results, metric = "ROC",
+                         tol = 2, maximize = TRUE)
+cat("best model within 2 pct of best:\n")
+
+```
+
+```{r Finding the best model:}
+
+gbmfit3$results[whichTwoPct, 1:6]
+
+```
+
+This indicates that we can get a less complex model with an area under the curve ROC of 0.914 (compared to the "pick the best" value of 0.922).
+
+The main issue with these functions is related to ordering the models from simplest to complex. In some cases this is easy(e.g. Simple trees, partial least squares. But in case of such this model, the ordering of models is subjective. For example, is a boosted three model using 100 iterations and a three depth of two more complex than one with 50 iterations in a three depth of eight? The package makes some choices regarding these order. In the case of boosted trees, the package assumes that increasing the number of iterations adds complexity at a faster rate than increasing the tree depth, some models are ordered on the number of iterations then ordered on depth. See `?best` for more examples for specific models.
 
 ### <a id="5.7 Extracting Predictions and Class Probabilities"></a>5.7 Extracting Predictions and Class Probabilities###
 
+As previously mentioned, objects produced by the ` train ` function contain the "optimize" model in the ` final model ` sub-object. Predictions can be made from these objects as usual. In some cases, such as ` PLS ` or ` GBM ` objects, additional parameters from the optimized fit may need to be specified.In these cases, the ` train ` objects uses the results of the perimeter optimization to predict new samples. For example, if predictions were created using ` predict that GPM `, do use would have to specify the number of trees directly (there is no default).Also, for binary classification, the predictions from this function take the form of the probability of one of the classes, so extra steps are required to convert this to a factor factor. ` predict that train ` automatically handles these details for this (and for other mod
+
+Also for `predict.train`, type options are standardized to be `"class"` and `"prob"` (the underlying code matches these to the appropriate choices for each model. For example:
+
+```{r Extracting predictions}
+
+predict(gbmfit3, newdata = head(testing))
+
+```
+
+```{r Extracting predictions part 2}
+
+predict(gbmfit3, newdata = head(testing), type = "prob")
+
+```
+
+```{r}
+
+gbmfit3
+?Sonar
+```
+
+
+### <a id="5.8 Exploring and Comparing Resampling Distributions"></a>5.8 Exploring and Comparing Resampling Distributions###
+
+
+#### <a id="5.8.1 Within-Model></a>5.8.1 Within-Model####
+
+There are several `lattice` functions that can be used to explore relationships between tuning parameters and the resampling results for a specific model:
+
+* `xyplot` and `stripplog` can be used to plot resampling statistics against (numeric) tuning parameters.
+* `histogram` and `densityplot` can also be used to look at distributions of the tuning parameters across tuning parameters.
+
+For example, the following statements create a density plot:
+
+```{r Density plot of the tuning parameters}
+
+trellis.par.set(caretTheme())
+densityplot(gbmfit3, pch = "|")
+
+?resamples
+
+```
+
+Note that if you are interested in putting the resampling results across multiple tuning parameters, the option `resamples equals "all"` should be used in the control object.
 
 
 ### <a id="5.8.2 Between-Models"></a>5.8.2 Between-Models###
 
+The `caret` package also includes functions to characterize the differences between models (generated using `train`, `SBF` or `RFE`) via their resampling distributions. These functions are based on the work of Hothorn et al. (2005) and Eugster at al. (2008).
 
+First, a support vector machine model is fit to the sewn our data. The data are centered and scaled using the `preProc` argument. Note that the same random number seed is that prior to the model that is identical to the seed used for the boosted tree model. This ensures that the same resampling sets are used, which will come in handy when we compare the resampling profiles between models.
+
+```{r Using a SVM model}
+
+set.seed(825)
+svmFit <- train(Class ~ ., data = training,
+                method = "svmRadial",
+                trControl = fitControl,
+                preProc = c("center", "scale"),
+                tuneLength = 8,
+                metric = "ROC")
+
+svmFit
+
+```
+
+Also, a regularized discriminant analysis model was fit.
+
+```{r Regularized discriminant analysis model}
+
+set.seed(825)
+rdaFit <- train(Class ~ ., data = training,
+                method = "rda",
+                trControl = fitControl,
+                tuneLength = 4,
+                metric = "ROC")
+
+rdaFit
+
+```
+
+Given these models, can we make statistical statements about their performancd differences? To do this, we first collect the resampling results using `resamples`.
+
+```{r Collect resampling results}
+
+resamps <- resamples(list(GBM = gbmfit3,
+                      SVM = svmFit,
+                      RDA = rdaFit))
+
+resamps
+
+```
+
+```{r Summary resamples}
+
+summary(resamps)
+
+```
+
+Note that, in this case, the option `resamples = "final"` should be user-defined in the control objects.
+
+There are several lattice plot methods that can ge used to visualize the resampling distributions: Density plots, box-whister plots, scatterplot matrices and scatter plots of summary statistics. For example:
+
+```{r Plots of summary statistics}
+
+theme1 <- trellis.par.get()
+theme1$plot.symbol$col = rgb(.2, .2, .2, .4)
+theme1$plot.symbol$pch = 16
+theme1$plot.line$col = rgb(1, 0, 0, .7)
+theme1$plot.lines$lwd <-  2
+trellis.par.set(theme1)
+bwplot(resamps, layout = c(3,1))
+
+```
+
+```{r Dotplot of resample data}
+
+trellis.par.set(caretTheme())
+dotplot(resamps, metric = "ROC")
+
+```
+
+```{r Scatter plot of resample data}
+
+trellis.par.set(theme1)
+xyplot(resamps, what = "BlandAltman")
+
+```
+
+```{r Scatterplot matrix}
+
+splom(resamps)
+
+```
+
+Other visualizations are available in ` density plot that resembles ` and ` parallel.resembles `
+
+Since models are fit on the same versions of the training data, it makes sense to make inferences on the differences between models. In this way we reduce the within a reasonable correlation that may exist. We can compute the differences, then use a simple TN test to evaluate the null hypothesis that there is no difference between the models.
+
+```{r Calculate differences}
+
+difValues <- diff(resamps)
+difValues
+
+```
+
+```{r Summary of difValues}
+
+summary(difValues)
+
+```
+
+```{r Box-whisker plot of difvalues}
+
+trellis.par.set(theme1)
+bwplot(difValues, layout = c(3,1))
+
+```
+
+```{r dot plot of difference values}
+
+trellis.par.set(caretTheme())
+dotplot(difValues)
+
+```
 
 ### <a id="5.9 Fitting Models Without Parameter Tuning"></a>Fitting Models Without Parameter Tuning###
 
