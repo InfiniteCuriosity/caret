@@ -80,14 +80,18 @@ head(newSamp)
 ```
 
 ```{r Finding the most dissimilar predictors in the diamonds data set}
-
-testing <- scale(diamonds[,c("price", "carat")])
+library(tidyverse)
+library(caret)
+testing <- diamonds[,c("price", "carat")]
 set.seed(314)
 ## A random sample of five data points
-startSet <- sample(1:dim(testing)[1],10)
+startSet <- sample(1:dim(testing)[1],1000)
 samplePool <- testing[-startSet,]
 start <- testing[startSet,]
 newSample <- maxDissim(start, samplePool, n = 10)
+newSample
+
+?maxDissim
 
 ```
 
