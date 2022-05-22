@@ -224,6 +224,38 @@ From these plants, a different set of tuning parameters may be desired. To chang
 
 #### <a id="5.5.4 The `trainControl` Function"></a>5.5.4 The `trainControl` Function###
 
+The function `trainControl` generates parameters that further control how models are created, with possible values :
+
+* `method`: The sampling method : `"boot"` , `"cv"`, `"LOOCV"`, `"LGOCV`, `"repeatedcv`, `"timeslice"`, `"none"`, and `"oob"`.The last value, out of bag estimates, can only be used by random forest, bagged trees, bagged earth, bagged flexible discriminant analysis, or conditional tree models. GBM models are not included. Also, for leave-one-out cross validation, no uncertainty estimates are given for the resampled performances measures.
+
+* `number` and `repeats`: `number` controls with the number of folds in *K*-fold cross validation or number of resampling iterations for bootstrapping and leave group-out-cross validation. `repeats` applied only to repeated K fold cross validation. Suppose that `method = "repeatedcv`, `number = 10` and `repeats = 3`, then three separate 10-fold corss-validations are used as the resampling scheme.
+
+* `verboseIter`: A logical for printing a training log.
+
+* `returnData`: A logical for saving the data into a slot called `trainingData`.
+
+* `p`: For leave-group-out cross-validation: The training percentage
+
+* for `method = "timeslice"`, `trainControl` has options `initialWindow`, `horizon`. and `fixedWindow` that govern how cross-validation can be used for time series data.
+
+* `classProbs`: A logical value determining whether class probabilities should be computed for held-out samples during resample.
+
+* `index` and `indexOut`: Optional lists with elements for each reasmpling iteration. Each list element is the sample rows used for training at that iteratin or should be held-out. When these valures are not specified, `train` will generate them.
+
+* `summaryFunction`: A function to compute alternate performance summaries.
+
+* `selectionFunction`: A function to choose the optimal tuning parameters, and examples.
+
+* `PCAthresh`, `ICAcomp`, and `k`: These are all options to pass to the `preProcess` function (when used)
+
+* `returnResamp`: A character string containing one of the following values: `"all"`, `"final"`, or `"none"`. This specifies how much of the resampled performance measures to save.
+
+* `allowParallel`: A logical that governs whether `train` should use parallel processing (if available).
+
+There are several other options not discussed here.
+
+
+
 
 #### <a id="5.5.5 Alternate Performance Metrics"></a>5.5.5 Alternate Performance Metrics###
 
